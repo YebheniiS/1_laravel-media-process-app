@@ -1,0 +1,38 @@
+type AgencyClubDfyContent {
+  id: ID!
+  niche: String!,
+  projects: JSON @rules(apply: ["max:255"])
+  landing_pages: JSON @rules(apply: ["max:255"])
+    image_url: String!
+}
+
+extend type Query @guard {
+    agencyClubDfyContent(id: ID @eq): AgencyClubDfyContent! @find
+
+    agencyClubDfyContents : [AgencyClubDfyContent] @all @orderBy(column: "created_at", direction: DESC)
+}
+
+input CreateAgencyClubDfyContentInput {
+    niche: String!
+    image_url: String!
+    projects: JSON @rules(apply: ["max:255"])
+    landing_pages: JSON @rules(apply: ["max:255"])
+}
+
+input UpdateAgencyClubDfyContent {
+    id: ID!
+    niche: String!
+    image_url: String!
+    projects: JSON @rules(apply: ["max:255"])
+    landing_pages: JSON @rules(apply: ["max:255"])
+}
+
+
+extend type Mutation {
+    "Create a new item"
+    createAgencyClubDfyContent(input: CreateAgencyClubDfyContentInput! @spread) : AgencyClubDfyContent @create
+    "Update a item"
+    updateAgenctClubDfyContent(input: UpdateAgencyClubDfyContent! @spread) : AgencyClubDfyContent @update
+    "Delete a item"
+    deleteAgencyClubDfyContent(id: ID!) : AgencyClubDfyContent @delete
+}

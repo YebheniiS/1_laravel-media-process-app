@@ -1,0 +1,36 @@
+type Comment {
+    id: ID!
+    "Name of the comment"
+    name: String!
+    "Email of the comment"
+    email: String!
+    "Body of the comment"
+    text: String!
+    "A link to the gravatar image of the commentator, see https://en.gravatar.com/ for more info on how this works"
+    image: String! @method(name: "gravatar")
+
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+extend type Query {
+    "Get a single comment"
+    comment(id: ID @eq): Comment @find
+    "Get project comments list"
+    comments(project_id: Int @eq): [Comment!]! @paginate
+}
+
+input CreateCommentInput {
+    project_id: Int! @rules(apply: ["max:30"])
+    name: String! @rules(apply: ["max:30"])
+    email: String! @rules(apply: ["max:30"])
+    text: String! @rules(apply: ["max:30"])
+}
+
+extend type Mutation {
+    "Create a new comment"
+    createComment(input: CreateCommentInput! @spread): Comment! @create
+    "Delete a single comment"
+    deleteComment(id: ID!): Comment! @delete @guard
+
+}

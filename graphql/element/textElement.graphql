@@ -1,0 +1,89 @@
+type TextElement  {
+    id: ID!
+    "The name of the element, this is shown on the timeline bar"
+    name: String
+    "The text is saved as HTML as this allows for use of WSIWIG editor in the button"
+    html: String
+    "X Position on the Canvas"
+    posX: Float
+    "Y Position on the Canvas"
+    posY: Float
+    "Width of the text wrapper"
+    width: Int
+    "Height of the text wrapper"
+    height: Int
+    "Default values when using dynamic text in the text html"
+    default_values: JSON
+    "Background color of the wrapping element"
+    backgroundColour: String
+    "The border radius of the wrapping element"
+    borderRadius: Int
+    "The border width of the wrapping element"
+    borderWidth: Int
+    "The color of the border of the wrapping element"
+    borderColor: String
+    "The type of border used on the wrapping element"
+    borderType: String
+    "The padding on the wrapping element"
+    padding: Int
+    "Stack order of the element"
+    zIndex: Int
+    "Css Letter Spacing property"
+    letterSpacing: Int
+    "Is dynamic text vars being used in the text"
+    dynamic: Int
+    "Animation JSON object"
+    animation: JSON
+
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+extend type Query @guard {
+    "Get a single text element instance"
+    textElement(id: ID! @eq) : TextElement @find
+}
+
+"Allowed update values for a text element"
+input UpdateTextElementInput {
+    id: ID
+    name: String @rules(apply: ["max:255"])
+    html: String = ""
+    posX: Float @rules(apply: ["max:11"])
+    posY: Float @rules(apply: ["max:11"])
+    width: Int @rules(apply: ["max:11"])
+    height: Int @rules(apply: ["max:11"])
+    default_values: JSON @rules(apply: ["max:255"])
+    backgroundColour: String @rules(apply: ["max:255"])
+    borderRadius: Int @rules(apply: ["max:11"])
+    borderWidth: Int @rules(apply: ["max:11"])
+    borderColor: String @rules(apply: ["max:255"])
+    borderType: String @rules(apply: ["max:255"])
+    padding: Int @rules(apply: ["max:11"])
+    zIndex: Int = 0 @rules(apply: ["max:11"])
+    letterSpacing: Int @rules(apply: ["max:11"])
+    dynamic: Int @rules(apply: ["max:11"])
+    animation: JSON @rules(apply: ["max:255"])
+}
+
+"Available fields for creating a new instance"
+input CreateTextElementInput {
+    name: String @rules(apply: ["max:255"])
+    posX: Float @rules(apply: ["max:11"])
+    posY: Float @rules(apply: ["max:11"])
+}
+
+extend type Mutation @guard {
+    "Create a new text element"
+    createTextElement(input: CreateTextElementInput @spread):
+        TextElement!
+        @create
+    "Update the text element"
+    updateTextElement(input: UpdateTextElementInput @spread):
+        TextElement
+        @update
+    "Delete the text element"
+    deleteTextElement(id: ID!):
+        TextElement
+        @delete
+}

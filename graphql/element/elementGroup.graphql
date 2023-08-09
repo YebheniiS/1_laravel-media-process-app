@@ -1,0 +1,59 @@
+type ElementGroup {
+    id: ID!
+    name: String!
+    timeOut: Float
+    timeIn: Float
+    node_id: Int!
+    node: Node @belongsTo
+    show_at_video_end: Int
+    pause_when_shown: Int
+    zIndex: Int
+
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+extend type Query @guard{
+    "Get a list of element groups"
+    elementGroups( node_id: Int @eq ) :
+    [ElementGroup!]!
+    @all
+    "Get a single element group"
+    elementGroup(
+        id: ID! @eq
+    ) : ElementGroup @find
+}
+
+input CreateElementGroupInput {
+    name: String! @rules(apply: ["max:255"])
+    node_id: Int! @rules(apply: ["max:11"])
+    timeIn: Float! @rules(apply: ["max:8"])
+    timeOut: Float! @rules(apply: ["max:8"])
+    zIndex: Int! @rules(apply: ["max:11"])
+}
+
+input UpdateElementGroupInput {
+    id: ID!
+    name: String @rules(apply: ["max:255"])
+    timeIn: Float @rules(apply: ["max:8"])
+    timeOut: Float @rules(apply: ["max:8"])
+    show_at_video_end: Int @rules(apply: ["max:11"])
+    pause_when_shown: Int @rules(apply: ["max:11"])
+    zIndex: Int @rules(apply: ["max:11"])
+}
+
+input UpdateElementGroupsHasMany {
+    update: [UpdateElementGroupInput]
+}
+
+extend type Mutation @guard {
+    "Create a new element group"
+    createElementGroup(input: CreateElementGroupInput @spread): ElementGroup!
+        @create
+    "Delete an element group"
+    deleteElementGroup(id: ID!) : ElementGroup
+        @can(ability: "destroy" find: "id")
+        @delete
+    "Update element group"
+    updateElementGroup(input: UpdateElementGroupInput @spread) : ElementGroup! @update
+}

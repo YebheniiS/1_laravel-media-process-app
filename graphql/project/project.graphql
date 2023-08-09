@@ -1,0 +1,290 @@
+type Project {
+    id: ID!
+    "Name of the project"
+    title: String!
+    "Project Description"
+    description: String
+    "Is the project a template that other users can access?"
+    is_template: Int
+    "Project thumbnail, used on the player as the video poster"
+    image_url: String
+    "Project audio track"
+    audio_track_url: String
+    "The first node of the project"
+    start_node_id: Int
+    "Width of the editor, this needs to be fixed for the resize maths to work"
+    base_width: Int
+    "height of the editor, this needs to be fixed for the resize maths to work"
+    base_height: Int
+    "Max Width of an embedded project"
+    embed_width: Int
+    "Max Height of an embedded project"
+    embed_height: Int
+    "Should the project autoplay (this will also start muted)"
+    autoplay: Int
+    "Last date the project was published. Can be null if not published yet"
+    published_at: DateTime
+    "The share page screenshot url"
+    share_page_screenshot: String
+    "Path to the projects storage folder in s3"
+    storage_path: String
+    "Full URL to the published project"
+    published_path: String
+    "The project font to be used on the player"
+    font: String
+    "The facebook pixel ID"
+    fbPixelId: Int
+    "A small logo thats shown in the corner of the player over the top of the video"
+    branding_image_src: String
+    "Thumbnail of the project to be used for the template list page"
+    template_image_url: String
+    "Name to be used on the template list page"
+    template_name: String
+    currency: String @deprecated(reason:"Currency is not currently used in any reporting")
+    "Should other videos be shown on the share page for this project"
+    show_more_videos_on_share_page: Int
+    "Are comments allowed on the share page for this project"
+    allow_comments: Int
+    "If the project is set to public it will be shown under the 'More videos from' section of the share page of other projects in the same folder"
+    is_public: Int
+    "Used to flag the project as a favourite on the project list page"
+    is_favourite: Int
+    "The ID of the folder for this project"
+    project_group_id: Int
+    "Allow sharing on the project player"
+    allow_share: Int
+    "JSON object of the sharing data"
+    share_data: JSON
+    "How many likes this project has on it's share page"
+    likes: Int
+    "The image used by google when sharing on a google platform. This is automatically generated from the project thumbnail"
+    google_image_url: String
+    "The image used by google when sharing on a facebook platform. This is automatically generated from the project thumbnail"
+    facebook_image_url: String
+    "The image used by google when sharing on a twitter platform. This is automatically generated from the project thumbnail"
+    twitter_image_url: String
+    "Enable chapters on the video player"
+    chapters: Int
+    "Other Videos that match this project group"
+    otherVideos: [Project] @method(name: "getOtherVideos")
+    "Player Skin for controls the apperance of the video player"
+    player_skin: JSON
+    "Project chapters"
+    chapter_items: JSON
+    "A projects nodes"
+    nodes: [Node!]!
+    "A projects nodes without userScope"
+    templateNodesCount: Int @method(name: "getTemplateNodesCount")
+    "Template Interactions"
+    template_interactions: Int
+    "Template likes count"
+    templateLikesCount: Int @method(name: "getTemplateLikesCount")
+    "Did current user like template"
+    isAuthUserLike: Boolean @method(name: "isAuthUserLike")
+    "A Projects Modals / Popus"
+    modals: [Modal!]!
+    "Get project thumbnails"
+    thumbnails: [String!]! @method(name: "getProjectThumbnails")
+    "A projects Comments"
+    comments: [Comment] @hasMany
+    "A project owner User"
+    user: User! @belongsTo
+    "Enable surveys on this project"
+    enable_surveys: Int
+    video_encoding_resolution: Int
+    "Dfy template"
+    template_is_dfy: Int  
+    "Example template"
+    template_is_example: Int
+    migration_status: Int
+
+    created_at: DateTime
+    updated_at: DateTime
+    template_is_dfy: Int
+    template_is_example: Int
+}
+extend type Query @guard{
+    "Get a single project"
+    project(id: ID @eq):
+    Project
+    @find
+
+    "Return a list of interactr projects, this function allows a filter by search param and project group id"
+    projects(
+        search: String
+        app: String = "interactr"
+        project_group_id: Int = null
+        orderBy: [SortOption!]!
+    ): [Project!]! @paginate(builder: "App\\GraphQL\\Mutations\\ProjectResolver@getProjects")
+
+    "Return all users projects without pagination, USE WITH CAUTION, should only be used to get the top level project not relations due to load times"
+    allProjects(
+        limit: Int @limit
+        app: String = "interactr" @eq
+        orderBy: [SortOption] = {column: "created_at", order: DESC} @orderBy
+    ) : [Project!]! @all
+
+    "Query the projects by the ID only, used to get the projects for sub user access list"
+    projectsById(
+        projectIds: [Int]! @in(key: "id")
+    ): [Project!]! @all
+    "Return a list of project tempalates, the title prop must be prefixed and suffixed by % for the search to query the mysql db correctly"
+    templates(
+        template_name: String
+        search: String = ""
+        is_template: Int = 1 @eq
+        template_is_dfy: Int = 0 @eq
+        template_is_example: Int = 0 @eq
+    ) : [Project!]! @paginate(builder: "App\\GraphQL\\Mutations\\ProjectResolver@getTemplates")
+
+    "Query the templates by the ID only, used to get the templates for the calendar view"
+    templatesById(
+        includeIds: [ID!] @in(key: "id")
+        @scope(name: "templates")
+    ): [Project!]! @all
+
+    "Get a single project template"
+    template(
+        id: ID @eq
+        @scope(name: "templates")
+    )
+    :Project @find
+}
+
+extend type Query {
+    "Get the project by it's hash for use on the share page"
+    sharepage(storage_path: String! @eq @scope(name: "sharepage")) : Project! @find
+}
+
+"Allowed update values for a users project"
+input UpdateProjectInput {
+    id: ID!
+    title: String @rules(apply: ["max:255"])
+    description: String
+    template_name: String @rules(apply: ["max:255"])
+    storage_path: String @rules(apply: ["max:255"])
+    image_url: String @rules(apply: ["max:255"])
+    audio_track_url: String @rules(apply: ["max:255"])
+    start_node_id: Int
+    embed_width: Int @rules(apply: ["max:11"])
+    embed_height: Int @rules(apply: ["max:11"])
+    base_width: Int @rules(apply: ["max:11"])
+    base_height: Int @rules(apply: ["max:11"])
+    chapter_items: JSON
+    autoplay: Int @rules(apply: ["boolean"])
+    player_skin: JSON
+    chapters:  Int @rules(apply: ["boolean"])
+    branding_image_src: String @rules(apply: ["max:255"])
+    template_image_url: String @rules(apply: ["max:255"])
+    google_image_url: String @rules(apply: ["max:255"])
+    facebook_image_url: String @rules(apply: ["max:255"])
+    twitter_image_url: String @rules(apply: ["max:255"])
+    is_public: Int @rules(apply: ["boolean"])
+    show_more_videos_on_share_page: Int @rules(apply: ["boolean"])
+    allow_comments: Int @rules(apply: ["boolean"])
+    allow_share: Int @rules(apply: ["boolean"])
+    share_data: JSON
+    project_group_id: Int @rules(apply: ["max:11"])
+    font:  String = "Quicksand" @rules(apply: ["max:255"])
+    fbPixelId: Int @rules(apply: ["max:20"])
+    is_favourite: Int @rules(apply: ["boolean"])
+    likes: Int @rules(apply: ["max:11"])
+    enable_surveys: Int @rules(apply: ["max:20"])
+    published_at: String @rules(apply: ["max:255"])
+    share_page_screenshot: String
+    video_encoding_resolution: Int
+    created_at: DateTime
+    is_template: Int @rules(apply: ["boolean"])
+    template_name: String @rules(apply: ["max:255"])
+    template_image_url: String @rules(apply: ["max:255"])
+    template_interactions: Int @rules(apply: ["max:11"])
+    template_is_dfy: Int @rules(apply: ["max:11"])
+    template_is_example: Int @rules(apply: ["max:11"])
+}
+
+"Update the admin fields of a project"
+input UpdateProjectAdmin {
+    id: ID!
+    is_template: Int @rules(apply: ["boolean"])
+    template_name: String @rules(apply: ["max:255"])
+    template_image_url: String @rules(apply: ["max:255"])
+}
+
+"The inputs needed to copy a project"
+input CopyProjectInput {
+    projectId: ID!
+    title: String @rules(apply: ["max:255"])
+    folderId: Int @rules(apply: ["max:11"])
+    description: String @rules(apply: ["max:255"])
+    copyFromTemplate: Boolean = false
+}
+
+input CreateTemplateProjectInput {
+    templateId: Int
+    title: String!
+    description: String
+    project_group_id: Int = null
+}
+
+input CreateBlankProjectInput {
+    title: String! @rules(apply: ["required", "max:255"])
+    branding_id: ID = 0
+    description: String
+    project_group_id: Int = null
+    
+    base_width: Int = 720
+    embed_width: Int = 720
+    send_notifications: Boolean
+}
+
+type RegenerateSocialThumbnailsResponse {
+    projectId: Int!
+    google_image_url: String!
+    facebook_image_url: String!
+    twitter_image_url: String!
+}
+
+input LikeTemplateInput {
+    id: ID!
+}
+
+extend type Mutation {
+    "Publish a project"
+    publishProject(id: ID !): Project
+        @field(resolver: "ProjectResolver@publish")
+    "unPublish a project"
+    unpublishProject(id: ID !): Project
+        @field(resolver: "ProjectResolver@unPublish")
+    "Update the project"
+    updateProject(input: UpdateProjectInput! @spread) : Project
+        @can(ability: "update" find: "id")
+        @update
+    "Update the project template settings"
+    updateProjectTemplate(input: UpdateProjectInput! @spread) : Project
+        @can(ability: "updateTemplate")
+        @update
+    "Create a new blank Project"
+    createBlankProject(input: CreateBlankProjectInput @spread) : Project
+        @can(ability: "create")
+        @create
+    "Create a new template Project"
+    createTemplateProject(input: CreateTemplateProjectInput @spread) : Project
+        @can(ability: "create")
+        @field(resolver: "ProjectResolver@createTemplateProject")
+    "Copy a project, used by either the create project from template or user copying a template"
+    copyProject(input: CopyProjectInput! @spread) : Project
+        @field(resolver: "ProjectResolver@copyProject")
+    "Delete a project"
+    deleteProject(id: ID!) : Project
+        @can(ability: "destroy" find: "id")
+        @delete
+    "Regenerate project social thumbnails"
+    regenerateSocialThumbnails(id: ID!) : RegenerateSocialThumbnailsResponse
+        @field(resolver: "ProjectResolver@regenerateSocialThumbnails")
+}
+
+extend type Mutation @guard {
+    "Like a template"
+    likeTemplate(input: LikeTemplateInput! @spread) : Project!
+        @field(resolver: "ProjectResolver@likeTemplate")
+}

@@ -1,0 +1,46 @@
+type TriggerElement {
+    id: ID!
+    "The name of the element, this is shown on the timeline bar"
+    name: String
+    "Type of action to take when trigger fires"
+    action: String
+    "Arg of action to take when trigger fires"
+    actionArg: String
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+extend type Query @guard {
+    "Get a single trigger element instance"
+    triggerElement(id: ID! @eq) : TriggerElement @find
+}
+
+"Allowed update values for a trigger element"
+input UpdateTriggerElementInput {
+    id: ID
+    name: String @rules(apply: ["max:255"])
+    action: String @rules(apply: ["max:255"])
+    actionArg: String @rules(apply: ["max:255"])
+}
+
+"Available fields for creating a new instance"
+input CreateTriggerElementInput {
+    name: String @rules(apply: ["max:255"])
+    posX: Float @rules(apply: ["max:11"])
+    posY: Float @rules(apply: ["max:11"])
+}
+
+extend type Mutation @guard {
+    "Create a new text element"
+    createTriggerElement(input: CreateTriggerElementInput @spread):
+        TriggerElement!
+        @create
+    "Update the trigger element"
+    updateTriggerElement(input: UpdateTriggerElementInput @spread):
+        TriggerElement
+        @update
+    "Delete the trigger element"
+    deleteTriggerElement(id: ID!):
+        TriggerElement
+        @delete
+}

@@ -1,0 +1,110 @@
+type Modal {
+    id: ID!
+    "Name of the modal"
+    name: String!
+    "Is this modal a template and available for users to use"
+    is_template: Int!
+    "Is this template only available to evolution pro users"
+    evolution_pro_template: Int!
+    "The image URL for the template show in the list users can select the template from"
+    template_image_url: String
+    "Animated templates need a preview video instead of a image"
+    template_video: String
+    "The name users will see when searching the templates"
+    template_name: String
+    "The modals child elements"
+    elements: [ModalElement!]! @hasMany
+    "The background color of the modal"
+    backgroundColour: String
+    "Should the modal be closeable"
+    show_close_icon: Int
+    "Border radius of the modal popup"
+    border_radius: Int
+    "Size of the modal"
+    size: Int
+    "The color of the close icon"
+    close_icon_color: String
+    "Is this modal an interaction layer"
+    interaction_layer: Int
+    "JSON object of the animation used on the background"
+    background_animation: JSON
+    project_id: Int
+    project: Project
+
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+extend type Query @guard {
+    "Get a single modal"
+    modal(id: ID @eq): Modal! @find
+
+    "Return a list of modal tempalates, the name prop must be prefixed and suffixed by % for the search to query the mysql db correctly"
+    modalTemplates(
+        name: String @where(operator: "like")
+        orderBy: [SortOption!]! @orderBy
+        @scope(name: "templates")
+    ) : [Modal!]! @all
+
+    "Get all modals for a given project"
+    modals(
+        project_id: Int! @eq
+        orderBy: [SortOption] = {column: "created_at", order: DESC} @orderBy
+    ) : [Modal] @all
+}
+
+input UpdateModalInput {
+    id: ID!
+    name: String @rules(apply: ["max:255"])
+    is_template: Int @rules(apply: ["max:11"])
+    evolution_pro_template: Int @rules(apply: ["max:11"])
+    template_image_url: String @rules(apply: ["max:255"])
+    template_video: String @rules(apply: ["max:255"])
+    template_name: String @rules(apply: ["max:255"])
+    backgroundColour: String @rules(apply: ["max:255"])
+    show_close_icon: Int @rules(apply: ["max:11"])
+    border_radius: Int @rules(apply: ["max:11"])
+    size: Int @rules(apply: ["max:11"])
+    close_icon_color: String @rules(apply: ["max:255"])
+    interaction_layer: Int @rules(apply: ["max:11"])
+    background_animation: JSON @rules(apply: ["max:255"])
+    elements: UpdateModalElementsHasMany
+}
+
+input CopyModalInput {
+    modalId: Int! @rules(apply: ["max:11"])
+    project_id: Int = 0 @rules(apply: ["max:11"])
+    name: String = ""  @rules(apply: ["max:255"])
+}
+
+input CreateModalInput {
+    project_id: Int ! @rules(apply: ["max:11"])
+    name: String = ""  @rules(apply: ["max:255"])
+    background_animation: JSON = {} @rules(apply: ["max:255"])
+}
+
+input ApplyTemplateInput {
+    modalId: Int!
+    templateId: Int!
+}
+
+extend type Mutation @guard {
+    "Update a single modal item"
+    updateModal(input: UpdateModalInput @spread):
+        Modal!
+        @update
+    "Delete a single modal item"
+    deleteModal(id: ID!):
+        Modal!
+        @delete
+    "Copy new modal"
+    copyModal(input: CopyModalInput @spread):
+        Modal!
+        @field(resolver: "ModalResolver@copyModal")
+    createModal(input: CreateModalInput @spread) :
+        Modal!
+        @create
+    applyTemplate(input: ApplyTemplateInput! @spread) :
+        Modal!
+        @field(resolver: "ModalResolver@applyTemplate")
+}

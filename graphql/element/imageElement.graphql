@@ -1,0 +1,84 @@
+type ImageElement {
+    id: ID!
+    "The name of the element, this is shown on the timeline bar"
+    name: String
+    "X Position on the Canvas"
+    posX: Float
+    "Y Position on the Canvas"
+    posY: Float
+    "Width of the image"
+    width: Int
+    "Height of the image"
+    height: Int
+    "The source url of the image"
+    src: String
+    "Type of action to take when image is clicked"
+    action: String
+    "Arg of action to take when image is clicked"
+    actionArg: String
+    "When image is clicked should it open link in new in window"
+    open_in_new_tab: Int
+    "Stack order of the element"
+    zIndex: Int
+    "The opacity of image element"
+    opacity: Float
+    "Animation JSON object"
+    animation: JSON
+    "Send event to facebook when the element is clicked"
+    send_facebook_click_event: Int
+    "The id of the facebook click event"
+    facebook_click_event_id: Int
+    "Send survey click event"
+    send_survey_click_event: Int
+
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+extend type Query @guard {
+    "Get a single image element instance"
+    imageElement(id: ID! @eq) : ImageElement @find
+}
+
+"Allowed update values for a image element"
+input UpdateImageElementInput {
+    id: ID
+    name: String @rules(apply: ["max:255"])
+    posX: Float @rules(apply: ["max:11"])
+    posY: Float @rules(apply: ["max:11"])
+    width: Int @rules(apply: ["max:11"])
+    height: Int @rules(apply: ["max:11"])
+    src: String @rules(apply: ["max:255"])
+    action: String @rules(apply: ["max:255"])
+    actionArg: String @rules(apply: ["max:255"])
+    open_in_new_tab: Int @rules(apply: ["max:11"])
+    zIndex: Int = 0 @rules(apply: ["max:11"])
+    opacity: Float
+    animation: JSON
+    send_facebook_click_event: Int @rules(apply: ["max:11"])
+    facebook_click_event_id: Int @rules(apply: ["max:11"])
+    send_survey_click_event: Int @rules(apply: ["max:11"])
+}
+
+"Available fields for creating a new instance"
+input CreateImageElementInput {
+    name: String @rules(apply: ["max:255"])
+    src: String @rules(apply: ["max:255"])
+    posX: Float @rules(apply: ["max:11"])
+    posY: Float @rules(apply: ["max:11"])
+}
+
+extend type Mutation @guard {
+    "Create a new hotspot element"
+    createImageElement(input: CreateImageElementInput @spread):
+        ImageElement!
+        @create
+    "Update the image element"
+    updateImageElement(input: UpdateImageElementInput @spread):
+        ImageElement
+        @update
+    "Delete the image element"
+    deleteImageElement(id: ID!):
+        ImageElement
+        @delete
+}

@@ -1,0 +1,42 @@
+type FacebookEvent  {
+    id: ID!
+    "The facebook event type: https://www.facebook.com/business/m/one-sheeters/facebook-pixel-events"
+    event_type: String!
+    "If custom event we can give the event an optional name"
+    event_name: String
+    "Pass meta data along with the facebook event"
+    meta_data: String
+}
+
+extend type Query @guard {
+    "Get a single facebook event"
+    facebookEvent(id: ID! @eq): FacebookEvent @find
+}
+
+input UpdateFacebookEventInput {
+    id: ID
+    event_type: String @rules(apply: ["max: 255"])
+    event_name: String @rules(apply: ["max: 255"])
+    meta_data: String @rules(apply: ["max: 255"])
+}
+
+input CreateFacebookEventInput {
+    event_type: String @rules(apply: ["max: 255"])
+    event_name: String @rules(apply: ["max: 255"])
+    meta_data: String @rules(apply: ["max: 255"])
+}
+
+extend type Mutation @guard {
+    "Create a new facebook event"
+    createFacebookEvent(input: CreateFacebookEventInput @spread) :
+        FacebookEvent!
+        @create
+    "Update the facebook event"
+    updateFacebookEvent(input: UpdateFacebookEventInput @spread) :
+        FacebookEvent!
+        @update
+    "Delete the facebook event"
+    deleteFacebookEvent(id: ID!) :
+        FacebookEvent
+        @delete
+}

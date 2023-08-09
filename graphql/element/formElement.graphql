@@ -1,0 +1,190 @@
+type FormElement {
+    id: ID!
+    "The name of the element, this is shown on the timeline bar"
+    name: String
+    "Should we show the name field on the form"
+    show_name_field: Int
+    "Type of integration to use"
+    integration: String
+    "The list ID to use for the integration"
+    integration_list: String
+    "Set with sub user id if the form is using sub user integrations"
+    sub_user: Int
+    "Action to take when the form is successfully submitted"
+    action: String
+    "The arg to use with the action"
+    actionArg: String
+    "Open the link in a new tab when form complete"
+    open_in_new_tab: Int
+    "X Position on the Canvas"
+    posX: Float
+    "Y Position on the Canvas"
+    posY: Float
+    "Width of the whole form"
+    width: Int
+    "Height of the form"
+    height: Int
+    "Display form fields inline"
+    on_one_line: Int
+    "The innerHTML of the button, allows for use of WSIWIG editor in the button"
+    button_html: String
+    "Background color of the button"
+    button_background: String
+    "Button border radius"
+    button_borderRadius: Int
+    "Width of the buttons border"
+    button_borderWidth: Int
+    "Button border color"
+    button_borderColor: String
+    "Button border type"
+    button_borderType: String
+    "The text color on the submit button"
+    button_text_color: String
+    "Back of the input fields"
+    input_background: String
+    "Text color of the input fields"
+    input_color: String
+    "Border radius of the form inputs"
+    input_borderRadius: Int
+    "The border width of the form inputs"
+    input_borderWidth: Int
+    "The border color of the form inputs"
+    input_borderColor: String
+    "The border type of the form inputs"
+    input_borderType: String
+    "Is this element a template"
+    is_template: Int
+    "Image url for the template to display when listing the templates"
+    template_image_url: String
+    "Name of the template used when listing the templates"
+    template_name: String
+    "Padding between the form inputs and buttons"
+    padding: Int
+    "Border radius of the wrapping element"
+    borderRadius: Int
+    "Background color of the wrapping element"
+    backgroundColour: String
+    "Left / Right padding of the button"
+    button_paddingSides: Int
+    "Stack order of the form"
+    zIndex: Int
+    "Text to show to the user when form is submitted successfully"
+    success_text: String
+    "Text to show to the user when form errors on submit"
+    error_text: String
+    "When enabled the form will return errors from the autoresponder integration instead of the custom error message"
+    debug_mode: Int
+    "The form input placeholder in the email input"
+    email_placeholder_text: String
+    "The form input placeholder in the name input"
+    name_placeholder_text: String
+    "Letter spacing on the button element"
+    button_letterSpacing: Int
+    "Zappier webhook to use on form submit"
+    integration_webhook: String
+    "Interactr custom list ID to use on form submit"
+    custom_list_id: Int
+    "Defines how to handle the form submit action"
+    data_handler: String
+    "Letter spacing on the form inputs"
+    input_letterSpacing: Int
+    "Send event to facebook when the form is submitted"
+    send_facebook_onSubmit_event: Int
+    "Facebook event relation"
+    facebook_onSubmit_event_id: Int
+    "Border width of the wrapping element"
+    border_width: Int
+    "Border type of the wrapping element"
+    border_type: String
+    "Border color of the wrapping element"
+    border_color: String
+
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+extend type Query @guard {
+    "Get a single form element instance"
+    formElement(id: ID! @eq) : FormElement @find
+
+    "Return a list of form element tempalates, the name prop must be prefixed and suffixed by % for the search to query the mysql db correctly"
+    formElementTemplates(
+        name: String @where(operator: "like")
+        is_template: Int = 1 @eq
+    ) : [FormElement!]! @paginate
+}
+
+"Allowed update values for a form element"
+input UpdateFormElementInput {
+    id: ID
+    name: String @rules(apply: ["max:255"])
+    show_name_field: Int @rules(apply: ["max:11"])
+    integration: String @rules(apply: ["max:255"])
+    integration_list: String @rules(apply: ["max:255"])
+    sub_user: Int @rules(apply: ["max:11"])
+    action: String @rules(apply: ["max:255"])
+    actionArg: String @rules(apply: ["max:255"])
+    open_in_new_tab: Int @rules(apply: ["max:11"])
+    posX: Float @rules(apply: ["max:11"])
+    posY: Float @rules(apply: ["max:11"])
+    width: Int @rules(apply: ["max:11"])
+    height: Int @rules(apply: ["max:11"])
+    on_one_line: Int @rules(apply: ["max:11"])
+    button_html: String
+    button_background: String @rules(apply: ["max:255"])
+    button_borderRadius: Int @rules(apply: ["max:11"])
+    button_borderWidth: Int @rules(apply: ["max:11"])
+    button_borderColor: String @rules(apply: ["max:255"])
+    button_borderType: String @rules(apply: ["max:255"])
+    button_text_color: String @rules(apply: ["max:255"])
+    input_background: String @rules(apply: ["max:255"])
+    input_color: String @rules(apply: ["max:255"])
+    input_borderRadius: Int @rules(apply: ["max:11"])
+    input_borderWidth: Int @rules(apply: ["max:11"])
+    input_borderColor: String @rules(apply: ["max:255"])
+    input_borderType: String @rules(apply: ["max:255"])
+    is_template: Int @rules(apply: ["max:11"])
+    template_image_url: String @rules(apply: ["max:255"])
+    template_name: String @rules(apply: ["max:255"])
+    padding: Int @rules(apply: ["max:11"])
+    borderRadius: Int @rules(apply: ["max:11"])
+    backgroundColour: String @rules(apply: ["max:255"])
+    button_paddingSides: Int @rules(apply: ["max:11"])
+    zIndex: Int = 0 @rules(apply: ["max:11"])
+    success_text: String @rules(apply: ["max:255"])
+    error_text: String @rules(apply: ["max:255"])
+    debug_mode: Int @rules(apply: ["max:11"])
+    email_placeholder_text: String @rules(apply: ["max:255"])
+    name_placeholder_text: String @rules(apply: ["max:255"])
+    button_letterSpacing: Int @rules(apply: ["max:11"])
+    integration_webhook: String @rules(apply: ["max:255"])
+    custom_list_id: Int @rules(apply: ["max:11"])
+    data_handler: String @rules(apply: ["max:255"])
+    input_letterSpacing: Int @rules(apply: ["max:11"])
+    send_facebook_onSubmit_event: Int @rules(apply: ["max:11"])
+    facebook_onSubmit_event_id: Int @rules(apply: ["max:11"])
+    border_width: Int @rules(apply: ["max:11"])
+    border_type:  String @rules(apply: ["max:255"])
+    border_color:   String @rules(apply: ["max:255"])
+}
+
+input CreateFormElementInput {
+    name: String @rules(apply: ["max:255"])
+    posX: Float @rules(apply: ["max:11"])
+    posY: Float @rules(apply: ["max:11"])
+}
+
+extend type Mutation @guard {
+    "Create a new form element"
+    createFormElement(input: CreateFormElementInput @spread):
+        FormElement!
+        @create
+    "Update the form element"
+    updateFormElement(input: UpdateFormElementInput @spread):
+        FormElement
+        @update
+    "Delete the form element"
+    deleteFormHtmlElement(id: ID!):
+        FormElement
+        @delete
+}

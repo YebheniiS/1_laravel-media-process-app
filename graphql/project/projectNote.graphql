@@ -1,0 +1,21 @@
+type ProjectNote {
+  id: ID!
+  text: String!
+  "A note owner User"
+  user: User! @belongsTo
+  "A note owner Project"
+  project: Project! @belongsTo
+
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateProjectNoteInput {
+  project_id: ID!
+  user_id: ID!
+  text: String!
+}
+
+extend type Mutation {
+  createNote(input: CreateProjectNoteInput! @spread): ProjectNote! @create
+}

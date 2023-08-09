@@ -1,0 +1,15 @@
+type PlayerVersion {
+    id: ID!
+    version_id: String!
+    js: String!
+    css: String!
+
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+extend type Query{
+    "Get the latest player version"
+    playerVersion: PlayerVersion!
+        @field(resolver: "App\\GraphQL\\Mutations\\PlayerVersionResolver@getLatestPlayerVersion")
+}

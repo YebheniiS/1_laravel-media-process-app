@@ -1,0 +1,19 @@
+type CustomListsEmails {
+    id: ID!
+    "The email of contact created for specific custom list"
+    email: String!
+    "The name of contact"
+    name: String
+
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+extend type Query @guard {
+    customListsEmails(id: ID @eq): CustomListsEmails @find
+}
+
+input CreateCustomListsEmailsInput {
+    email: String! @rules(apply: ["max:255", "email"])
+    name: String! @rules(apply: ["max:255"])
+}

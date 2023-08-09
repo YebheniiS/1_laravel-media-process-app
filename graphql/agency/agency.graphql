@@ -1,0 +1,53 @@
+type Agency {
+    id: ID!
+    "Name of the agency"
+    name: String
+    "The custom domain to be used for the agency. When loaded on this domain the app will load the custom theme for the users agency."
+    domain: String
+    "Has the DNS for the custom domain name been verfied"
+    domain_verified: Int
+    "Page title to be shown on the custom domain"
+    page_title: String
+    "Primary color used on the custom agency domain. Replaces the green buttons in the main app"
+    primary_color: String
+    "The secondary color used on the custom agency domain. Replaces the blue buttons in the main app"
+    secondary_color: String
+    "Agency page background color. Used for the background on the login page and the sidebar background when on the custom domain"
+    background_colour: String
+    "Page icon to be shown when the custom domain is used"
+    icon: String
+    "Logo for the agency. Shown on the custom domain login page, bottom right corner and the header of share pages"
+    logo: String
+
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+extend type Query @guard{
+    "Use with caution firstOrCreate mutation should be used to get a users agency on the edit agency page"
+    agencyFirstOrCreate: Agency! @can(ability: "create") @field(resolver: "App\\GraphQL\\Mutations\\AgencyResolver@firstOrCreate")
+}
+
+extend type Query {
+    "Get the whitelabel info from the agency based off the domain name"
+    whitelabel(domain: String!): Agency @field(resolver: "App\\GraphQL\\Mutations\\AgencyResolver@getWhitelabel")
+}
+
+# Update agency fields
+input UpdateAgencyInput {
+    id: ID!,
+    name: String @rules(apply: ["max:255"])
+    domain: String @rules(apply: ["max:255"])
+    domain_verified: Int @rules(apply: ["max:11"])
+    page_title: String @rules(apply: ["max:255"])
+    primary_color: String @rules(apply: ["max:255"])
+    secondary_color: String @rules(apply: ["max:255"])
+    background_colour: String @rules(apply: ["max:255"])
+    icon: String @rules(apply: ["max:255"])
+    logo: String @rules(apply: ["max:255"])
+}
+
+extend type Mutation @guard {
+    "Update an agency"
+    updateAgency(input: UpdateAgencyInput! @spread) : Agency @can(ability: "update", find: "id") @update
+}

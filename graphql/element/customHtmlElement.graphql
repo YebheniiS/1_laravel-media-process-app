@@ -1,0 +1,63 @@
+type CustomHtmlElement {
+    id: ID!
+    "The name of the element, this is shown on the timeline bar"
+    name: String
+    "The html of the element, note we currently don't support javascript here only actual HTML"
+    html: String
+    "Default values when using dynamic text in the text html"
+    default_values: JSON
+    "X Position on the Canvas"
+    posX: Float
+    "Y Position on the Canvas"
+    posY: Float
+    "Width of the button"
+    width: Int
+    "Height of the button"
+    height: Int
+    "Stack order of the element"
+    zIndex: Int
+
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+extend type Query @guard {
+    "Get a single custom html element instance"
+    customHtmlElement(id: ID! @eq) : CustomHtmlElement @find
+}
+
+"Allowed update values for a custom html element"
+input UpdateCustomHtmlElementInput {
+    id: ID
+    name: String @rules(apply: ["max:255"])
+    html: String
+    default_values: JSON @rules(apply: ["max:255"])
+    posX: Float @rules(apply: ["max:11"])
+    posY: Float @rules(apply: ["max:11"])
+    width: Int @rules(apply: ["max:11"])
+    height: Int @rules(apply: ["max:11"])
+    zIndex: Int = 0 @rules(apply: ["max:11"])
+}
+
+"Allowed update values for a html element"
+input CreateCustomHtmlElementInput {
+    name: String @rules(apply: ["max:255"])
+    html: String @rules(apply: ["max:255"])
+    posX: Float @rules(apply: ["max:11"])
+    posY: Float @rules(apply: ["max:11"])
+}
+
+extend type Mutation @guard {
+    "Create a new custom html element"
+    createCustomHtmlElement(input: CreateCustomHtmlElementInput @spread):
+        CustomHtmlElement!
+        @create
+    "Update the custom html element"
+    updateCustomHtmlElement(input: UpdateCustomHtmlElementInput @spread):
+        CustomHtmlElement
+        @update
+    "Delete the custom html element"
+    deleteCustomHtmlElement(id: ID!):
+        CustomHtmlElement
+        @delete
+}

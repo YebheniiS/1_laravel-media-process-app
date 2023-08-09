@@ -1,0 +1,31 @@
+type Branding {
+  id: ID!
+  name: String!
+  foreground_color: String!
+  background_color: String!
+  user: User! @belongsTo
+
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input CreateBrandingInput {
+  user_id: ID!
+  name: String!
+  foreground_color: String!
+  background_color: String!
+}
+
+extend type Mutation @guard {
+  createBranding(input: CreateBrandingInput! @spread): Branding! @create
+}
+
+# extend type Mutation @guard {
+#   createBranding(
+#     input: CreateBrandingInput! @spread
+#     user_id: ID!
+#     name: String!
+#     foreground_color: String!
+#     background_color: String!
+#   ): Branding! @create
+# }

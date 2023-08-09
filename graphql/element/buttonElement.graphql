@@ -1,0 +1,103 @@
+type ButtonElement {
+    id: ID!
+    "The name of the element, this is shown on the timeline bar"
+    name: String
+    "The innerHTML of the button, allows for use of WSIWIG editor in the button"
+    html: String
+    "Default values when using dynamic text in the text html"
+    default_values: JSON
+    "X Position on the Canvas"
+    posX: Float
+    "Y Position on the Canvas"
+    posY: Float
+    "Width of the button"
+    width: Int
+    "Height of the button"
+    height: Int
+    "Background color of the button"
+    background: String
+    "Border Radius"
+    borderRadius: Int
+    "Border Width"
+    borderWidth: Int
+    "Border Color"
+    borderColor: String
+    "Type of borer"
+    borderType: String
+    "Type of action to take when button is clicked"
+    action: String
+    "Arg of action to take when button is clicked"
+    actionArg: String
+    "When button is clicked should it open link in new in window"
+    open_in_new_tab: Int
+    "Stack order of the element"
+    zIndex: Int
+    "Css Letter Spacing property"
+    letterSpacing: Int
+    "Animation JSON object"
+    animation: JSON
+    "Send event to facebook when the element is clicked"
+    send_facebook_click_event: Int
+    "The id of the facebook click event"
+    facebook_click_event_id: Int
+    "Send survey click event"
+    send_survey_click_event: Int
+
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+extend type Query @guard {
+    "Get a single button element instance"
+    buttonElement(id: ID! @eq) :
+    ButtonElement
+    @find
+}
+
+"Allowed update values for a button element"
+input UpdateButtonElementInput {
+    id: ID
+    name: String @rules(apply: ["max:255"])
+    html: String
+    default_values: JSON @rules(apply: ["max:255"])
+    posX: Float @rules(apply: ["max:11"])
+    posY: Float @rules(apply: ["max:11"])
+    width: Int @rules(apply: ["max:11"])
+    height: Int @rules(apply: ["max:11"])
+    background: String @rules(apply: ["max:255"])
+    borderRadius: Int @rules(apply: ["max:11"])
+    borderWidth: Int @rules(apply: ["max:11"])
+    borderColor: String @rules(apply: ["max:255"])
+    borderType: String @rules(apply: ["max:255"])
+    action: String @rules(apply: ["max:255"])
+    actionArg: String @rules(apply: ["max:255"])
+    open_in_new_tab: Int @rules(apply: ["max:11"])
+    zIndex: Int = 0 @rules(apply: ["max:11"])
+    letterSpacing: Int @rules(apply: ["max:11"])
+    animation: JSON @rules(apply: ["max:255"])
+    send_facebook_click_event: Int @rules(apply: ["max:11"])
+    facebook_click_event_id: Int @rules(apply: ["max:11"])
+    send_survey_click_event: Int @rules(apply: ["max:11"])
+}
+
+"Available fields for creating a new instance"
+input CreateButtonElementInput {
+    name: String @rules(apply: ["max:255"])
+    posX: Float @rules(apply: ["max:11"])
+    posY: Float @rules(apply: ["max:11"])
+}
+
+extend type Mutation @guard {
+    "Create a new button element"
+    createButtonElement(input: CreateButtonElementInput @spread):
+        ButtonElement!
+        @create
+    "Update the button element"
+    updateButtonElement(input: UpdateButtonElementInput @spread):
+        ButtonElement
+        @update
+    "Delete the button element"
+    deleteButtonElement(id: ID!):
+        ButtonElement
+        @delete
+}

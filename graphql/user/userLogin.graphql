@@ -1,0 +1,17 @@
+type UserLogin {
+  id: ID!
+  user_id: Int!
+  country_code: String
+  region_code: String
+
+  "User login belongs to User"
+  user: User! @belongsTo
+
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+# Queries
+extend type Query @guard  {
+  userLogins: [UserLogin!]! @all
+}

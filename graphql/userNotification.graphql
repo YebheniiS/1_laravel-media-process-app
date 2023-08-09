@@ -1,0 +1,44 @@
+type UserNotification {
+  id: ID!
+  "Title of the user feature notification"
+  title: String!
+  "Details of the user feature notification"
+  details: String!
+  "Launch date of the user feature"
+  launch_date: Date!
+  "Modal height for the user notification box"
+  modal_height: Int
+
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+input CreateUserNotificationInput {
+  title: String! @rules(apply: ["max:255"])
+  details: String!
+  launch_date: Date!
+  modal_height: Int
+}
+
+input UpdateUserNotificationInput {
+  id: ID!
+  title: String! @rules(apply: ["max:255"])
+  details: String!
+  launch_date: Date!
+  modal_height: Int
+}
+
+# Queries
+extend type Query @guard  {
+    "Get all notifications"
+    allUserNotifications(limit: Int @limit, orderBy: [SortOption] = {column: "created_at", order: DESC} @orderBy) : [UserNotification] @all
+}
+
+extend type Mutation {
+  "Create User Notification"
+  createUserNotification(input: CreateUserNotificationInput! @spread): UserNotification @can(ability: "create") @create
+  "Update User Notification"
+  updateUserNotification(input: UpdateUserNotificationInput! @spread): UserNotification @can(ability: "update", injectArgs: true) @update
+  "Delete a user notification"
+  deleteUserNotification(id: ID!) : UserNotification @can(ability: "delete", injectArgs: true) @delete
+}

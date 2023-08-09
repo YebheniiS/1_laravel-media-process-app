@@ -1,0 +1,52 @@
+type AgencyClubLandingPage {
+  id: ID!
+  name: String!
+  convertri_url: String
+  html_url: String
+  clickfunnels_url: String!
+  preview_url: String!
+  image_url: String!
+
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+extend type Query @guard {
+    agencyClubLandingPage(
+        id: ID! @eq
+    ): AgencyClubLandingPage @find
+    agencyClubLandingPages: [AgencyClubLandingPage] @all @orderBy(column: "created_at", direction: DESC)
+
+    agencyClubLandingPagesById(
+        includeIds: [ID!] @in(key: "id")
+        # @scope(name: "agencyClubLandingPage")
+    ): [AgencyClubLandingPage] @all
+}
+
+input CreateLandingPageInput {
+    name: String! @rules(apply: ["max:255"])
+    convertri_url: String @rules(apply: ["max:255"])
+    html_url: String @rules(apply: ["max:255"])
+    clickfunnels_url: String! @rules(apply: ["max:255"])
+    preview_url: String! @rules(apply: ["max:255"])
+    image_url: String! @rules(apply: ["max:255"])
+}
+
+input UpdateLandingPageInput {
+    id: ID!
+    name: String! @rules(apply: ["max:255"])
+    convertri_url: String @rules(apply: ["max:255"])
+    html_url: String @rules(apply: ["max:255"])
+    clickfunnels_url: String! @rules(apply: ["max:255"])
+    preview_url: String! @rules(apply: ["max:255"])
+    image_url: String! @rules(apply: ["max:255"])
+}
+
+extend type Mutation {
+    "Create a new landing page"
+    createLandingPage(input: CreateLandingPageInput! @spread) : AgencyClubLandingPage @create
+    "Update a landing page"
+    updateLandingPage(input: UpdateLandingPageInput! @spread) : AgencyClubLandingPage @update
+    "Delete a landing page"
+    deleteLandingPage(id: ID!) : AgencyClubLandingPage @delete
+}

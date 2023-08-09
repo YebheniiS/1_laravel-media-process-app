@@ -1,0 +1,64 @@
+type ProjectGroup {
+  id: ID!
+  "The name of the group"
+  title: String!
+  "The sort order of the groups"
+  sort_order: Int!
+  "Get projects count of project group"
+  projects_count: Int @method(name: "getProjectsCount")
+  "A project group all project id's"
+  projectIds: [Int!]! @method(name: "getProjectIds")
+
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type SortedList {
+  id: Int!
+  sort_order_number: Int!
+}
+
+extend type Query @guard {
+  "List the users projects by group"
+  projectGroups(
+    orderBy: [SortOption] = [{ column: "sort_order", order: ASC }] @orderBy
+  ): [ProjectGroup!]! @all
+}
+
+input CreateProjectGroupInput {
+  title: String! @rules(apply: ["max:255"])
+  sort_order: Int @rules(apply: ["max:11"])
+}
+
+input UpdateProjectGroupInput {
+  id: ID!
+  title: String @rules(apply: ["max:255"])
+  sort_order: Int @rules(apply: ["max:11"])
+}
+
+input SortingListInput {
+  id: Int!
+  sort_order_number: Int
+}
+
+input UpdateProjectGroupsSortingInput {
+  lists: [SortingListInput!]!
+}
+
+extend type Mutation @guard {
+  "Create a new project group"
+  createProjectGroup(input: CreateProjectGroupInput @spread): ProjectGroup
+    @can(ability: "create")
+    @create
+  "Update a project Group"
+  updateProjectGroup(input: UpdateProjectGroupInput @spread): ProjectGroup
+    @can(ability: "update", find: "id")
+    @update
+  "Delete a project group"
+  deleteProjectGroup(id: ID!): ProjectGroup @delete
+
+  updateProjectGroupsSorting(
+    input: UpdateProjectGroupsSortingInput @spread
+  ): [SortedList!]!
+    @field(resolver: "ProjectGroupResolver@updateProjectGroupsSorting")
+}

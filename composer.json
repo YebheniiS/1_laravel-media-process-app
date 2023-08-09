@@ -1,0 +1,94 @@
+{
+    "name": "laravel/laravel",
+    "description": "The Laravel Framework.",
+    "keywords": ["framework", "laravel"],
+    "license": "MIT",
+    "type": "project",
+    "require": {
+        "php": ">=7.2.5",
+        "activecampaign/api-php": "^2.0",
+        "doctrine/dbal": "^2.10.2",
+        "drewm/mailchimp-api": "^2.5",
+        "fruitcake/laravel-cors": "^3.0",
+        "ghattrell/activecampaign": "^1.1",
+        "guzzlehttp/guzzle": "^7.0.1",
+        "honeybadger-io/honeybadger-laravel": "^3.2",
+        "kylekatarnls/update-helper": "^1.2",
+        "laravel/framework": "^9.0",
+        "laravel/helpers": "^1.2",
+        "laravel/nova": "*",
+        "laravel/sanctum": "^2.15",
+        "laravel/scout": "^9.4",
+        "laravel/tinker": "^2.4",
+        "laravel/ui": "^3.0",
+        "league/flysystem-aws-s3-v3": "^3.0",
+        "martinjuul/many-to-many": "^1.0",
+        "mll-lab/laravel-graphql-playground": "^2.1",
+        "nunomaduro/collision": "^6.1",
+        "nuwave/lighthouse": "^5.0",
+        "predis/predis": "^1.1",
+        "pusher/pusher-php-server": "^4.1",
+        "qencode/api-client": "^1.08",
+        "restpackio/restpack-php": "^1.0",
+        "symfony/http-client": "^6.2",
+        "symfony/mailgun-mailer": "^6.2"
+    },
+    "php": "^8.0",
+    "require-dev": {
+        "filp/whoops": "~2.0",
+        "fzaninotto/faker": "~1.4",
+        "haydenpierce/class-finder": "^0.4.2",
+        "mockery/mockery": "0.9.*",
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "classmap": [
+            "database/seeds",
+            "database/factories",
+            "app/Services"
+        ],
+        "psr-4": {
+            "App\\": "app/"
+        },
+        "files":[
+            "app/Helper/global.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": [
+            ]
+        }
+    },
+    "scripts": {
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate"
+        ],
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover"
+        ]
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./nova"
+        }
+    ],
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "kylekatarnls/update-helper": true
+        }
+    }
+}

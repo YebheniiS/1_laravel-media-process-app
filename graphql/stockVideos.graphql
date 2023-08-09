@@ -1,0 +1,15 @@
+extend type Query {
+  stockVideos: StockVideos
+}
+
+input SearchInput {
+  query: String
+  page: Int = 1
+  per_page: Int = 50
+}
+
+type StockVideos {
+  giphySearch(input: SearchInput): JSON! @method
+  pexelsSearch(input: SearchInput): JSON! @method
+  pixabaySearch(input: SearchInput): JSON! @method
+}

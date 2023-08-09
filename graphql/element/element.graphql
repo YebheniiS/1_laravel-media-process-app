@@ -1,0 +1,8 @@
+#interface Element {
+#    id: ID!
+#    name: String!
+#    action: String
+#    actionArg: String
+#}
+
+union Element = ButtonElement | TriggerElement | ImageElement | TextElement | CustomHtmlElement | FormElement | HotspotElement

@@ -1,0 +1,118 @@
+type Interaction {
+    id: ID!
+    "The type of element for this interaction, used to create polymorphic relation to the elements tables"
+    element_type: String!
+    "The element id inside the elements tables via a polymoprhic relationship"
+    element_id: Int!
+    "The time that this element should appear"
+    timeIn: Float! @method(name: "getTimeIn")
+    "The time that this element should hide"
+    timeOut: Float! @method(name: "getTimeOut")
+    "When set to true the video will pause when this element shows"
+    pause_when_shown: Int!
+    "When using the new element wizard a draft is created so we can assigned the relationship id's for the element"
+    draft: Int!
+    "Defines the relationship between this interaction and the element groups table"
+    element_group_id: Int
+    "The node this element is being used on"
+    node_id: Int
+    "The interactions element uses the Element Interface to define the polymorphic relation to the various element types"
+    element: Element! @morphTo
+    "Get zIndex from interaction element for ordering in UI"
+    zIndex: Int! @method(name: "getElementZindex")
+    "Should the interaction show when the video ends"
+    show_at_video_end: Int!
+    "Fire a facebook pixel when this element is viewed"
+    send_facebook_view_event: Int
+    "Id of the event to fire from the Facebook Event table"
+    facebook_view_event_id: Int
+
+
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+
+extend type Query @guard {
+    "Get a single interaction"
+    interaction(id: ID! @eq) :
+    Interaction
+    @find
+    "Get a list of interactions"
+    interactions( node_id: Int @eq ) :
+    [Interaction!]!
+    @all
+}
+
+type CreateInteractionResponse {
+    interaction: Interaction!
+    node: Node
+    modal: Modal
+}
+
+input CreateInteractionInput {
+    node_id: Int! @rules(apply: ["max:11"])
+    interaction_layer: Int = 0 @rules(apply: ["max:11"])
+    element_type: String! @rules(apply: ["max:255"])
+    element_id: Int! @rules(apply: ["max:11"])
+    element_group_id: Int @rules(apply: ["max:11"])
+    timeIn: Float = 0
+    timeOut: Float = 60
+    draft: Int = 0 @rules(apply: ["max:11"])
+}
+
+"Fields for copying an interaction"
+input CopyInteractionInput {
+    id: ID!
+    "Should the node id be changed"
+    node_id: Int @rules(apply: ["max:11"])
+}
+
+input UpdateInteractionInput {
+    id: ID!
+    timeIn: Float @rules(apply: ["max:8"])
+    timeOut: Float @rules(apply: ["max:8"])
+    pause_when_shown: Int @rules(apply: ["max:1"])
+    draft: Int @rules(apply: ["max:1"])
+    show_at_video_end: Int @rules(apply: ["max:11"])
+    element_group_id: Int @rules(apply: ["max:11"])
+    node_id: Int @rules(apply: ["max:11"])
+    element_type: String @rules(apply: ["max:255"])
+    element_id: Int @rules(apply: ["max:11"])
+    send_facebook_view_event: Int @rules( apply: ["max:11"])
+    facebook_view_event_id: Int @rules( apply: ["max:11"])
+    ButtonElement: UpdateButtonElement
+    HotspotElement: UpdateHotspotElement
+    ImageElement: UpdateImageElement
+    TextElement: UpdateTextElement
+    CustomHtmlElement:UpdateCustomHtmlElement
+    TriggerElement: UpdateTriggerElement
+    FormElement: UpdateFormElement
+}
+
+
+
+input UpdateInteractionsHasMany {
+    update: [UpdateInteractionInput]
+}
+
+extend type Mutation @guard {
+    "Copy an interaction"
+    copyInteraction(input: CopyInteractionInput! @spread): Interaction
+    @field(resolver: "InteractionResolver@copy")
+
+    "Create a new interaction"
+    createInteraction(input: CreateInteractionInput @spread): Interaction
+    @can(ability: "create" injectArgs: true)
+    @create
+
+    "Update an interaction"
+    updateInteraction(input: UpdateInteractionInput! @spread) : Interaction
+    @can(ability: "update" find:"id")
+    @update
+
+    "Delete an interaction"
+    deleteInteraction(id: ID!): Interaction
+    @can(ability: "destroy" find:"id")
+    @delete
+}

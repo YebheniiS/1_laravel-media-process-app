@@ -1,0 +1,133 @@
+type Node {
+  id: ID!
+  "The name of this node"
+  name: String
+  description: String
+    @deprecated(reason: "Not currently shown in the UI anywhere")
+  "The horizontal position of the node in the project canvas"
+  posX: Float
+  "The vertical position of the node in the project canvas"
+  posY: Float
+  "What action should the node take when the video is complete"
+  completeAction: String
+  "The action arg will be the value for the action that the node will take when it completes. If action is play node the arg will be the node id for example"
+  completeActionArg: String
+  "Should the complete action be delayed"
+  completeActionDelay: Int
+  "Show a timer with the delay"
+  completeActionTimer: Int
+  "Play a sound when the timer shows"
+  completeActionSound: Int
+  has_chapters: Int
+    @deprecated(
+      reason: "Chapters are now defined on the project level not node level"
+    )
+  "The chapters sort order for this node, used on the project chapters page and the player chapters popup"
+  sort_order: Int
+  "Should this node loop and play again once its media has finished"
+  loop: Int
+  "The interaction layer id for this node. This is a relation with a modal"
+  interaction_layer_id: Int
+  "Toggle the interaction layer"
+  enable_interaction_layer: Int
+  "Set the background color for the node"
+  background_color: String
+  "The nodes interactions"
+  interactions: [Interaction!]! @hasMany
+  "The project ID the node is attached too"
+  project_id: Int!
+  "The project that this node belongs to"
+  project: Project @belongsTo
+  "The media ID of the node"
+  media_id: Int!
+  "The media item that this node belongs to"
+  media: Media @belongsTo
+  "The animation when the video transitions to a new one"
+  completeAnimation: String
+  "This nodes element groups"
+  element_groups(
+    orderBy: [SortOption] = { column: "zIndex", order: DESC } @orderBy
+  ): [ElementGroup] @hasMany
+  "The duration of the node if the node has no video"
+  duration: Int
+
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+extend type Query @guard {
+  "Get a single node"
+  node(id: ID! @eq): Node @find
+  "Get a list of nodes"
+  nodes(project_id: Int @eq): [Node!]! @all
+  "Get a list of nodes and it's elements that have survey option checked"
+  surveyNodes(project_id: Int! @scope(name: "surveys")): [Node] @all
+}
+
+"Required fields for creating a new node"
+input CreateNodeInput {
+  name: String = "New Node" @rules(apply: ["max:255"])
+  posX: Float!
+  posY: Float!
+  media_id: Int = 0
+  project_id: Int!
+  background_color: String @rules(apply: ["max:255"])
+  duration: Int @rules(apply: ["max:11"])
+}
+
+"Availble fields for updating a node"
+input UpdateNodeInput {
+  id: ID!
+  name: String @rules(apply: ["max:255"])
+  posX: Float
+  posY: Float
+  sort_order: Int @rules(apply: ["max:11"])
+  completeAction: String @rules(apply: ["max:255"])
+  completeActionArg: String @rules(apply: ["max:255"])
+  loop: Int @rules(apply: ["max:11"])
+  interaction_layer_id: Int @rules(apply: ["max:11"])
+  interactions: UpdateInteractionsHasMany
+  element_groups: UpdateElementGroupsHasMany
+  media_id: Int @rules(apply: ["max:11"])
+  media: UpdateMediaBelongsTo
+  enable_interaction_layer: Int @rules(apply: ["max:11"])
+  completeActionTimer: Int @rules(apply: ["max:11"])
+  completeActionSound: Int @rules(apply: ["max:11"])
+  completeActionDelay: Int @rules(apply: ["max:11"])
+  completeAnimation: String @rules(apply: ["max:255"])
+  background_color: String @rules(apply: ["max:255"])
+  duration: Int @rules(apply: ["max:11"])
+  created_at: DateTime
+}
+
+input CopyNodeInput {
+  "Id of the node to copy"
+  id: ID!
+  "Project to assign the node to"
+  project_id: Int!
+  name: String
+  posX: Float @rules(apply: ["max:11"])
+  posY: Float @rules(apply: ["max:11"])
+}
+
+input SortNodesInput {
+  "Sort nodes input collection"
+  nodes: JSON!
+}
+
+extend type Mutation @guard {
+  "Delete a node"
+  deleteNode(id: ID!): Node @can(ability: "destroy", find: "id") @delete
+  "Create a new node"
+  createNode(input: CreateNodeInput @spread): Node @create
+  "Update a node"
+  updateNode(input: UpdateNodeInput @spread): Node
+    @can(ability: "update", find: "id")
+    @update
+  "Copy a node"
+  copyNode(input: CopyNodeInput @spread): Node
+    @field(resolver: "App\\GraphQL\\Mutations\\NodeResolver@copyNode")
+  "Sort nodes by sort_order field"
+  sortNodes(input: SortNodesInput! @spread): String
+    @field(resolver: "App\\GraphQL\\Mutations\\NodeResolver@sortNodes")
+}

@@ -1,0 +1,21 @@
+type BunnyCdnVideo {
+    id: ID!
+    "The GUID of the video in the bunny.net system"
+    bunny_cdn_video_id: Int
+    "The media id relation"
+    media_id: Int
+    "The name of the video in bunny.net system"
+    name: String
+    "the status from bunny.net full status can be found here https://github.com/chrisbell08/interactr/wiki/Content-Delivery-Network"
+    status: Int
+
+    media: Media
+
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+extend type Query @guard {
+    "Get a single item"
+    BunnyCdnVideo(media_id: ID @eq) : BunnyCdnVideo @find
+}

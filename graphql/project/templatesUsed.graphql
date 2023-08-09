@@ -1,0 +1,12 @@
+type TemplatesUsed {
+  id: ID!
+  project: Project! @belongsTo
+  user: User! @belongsTo
+
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+extend type Query @guard{
+  allTemplatesUsed: [TemplatesUsed!]! @all
+}

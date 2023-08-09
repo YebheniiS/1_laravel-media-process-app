@@ -1,0 +1,221 @@
+type User {
+  id: ID!
+  "Name of the user"
+  name: String!
+  "Email of the user"
+  email: String!
+  "Password of the user"
+  password: String @method(name: "getPassword")
+  "A user avatar"
+  avatar_url: String
+  integration_aweber: JSON
+  integration_sendlane: JSON
+  integration_activecampaign: JSON
+  integration_getresponse: JSON
+  "Superusers has Full Admin access, reserved only for developers and support staff"
+  superuser: Int
+  "The name of a users company. This is displayed with the 'More From' text on share pages"
+  company_name: String
+  "The users logo, shown in the 'more from' section on the share page"
+  logo: String
+  "Does this user have access to agency features?"
+  is_agency: Int
+  "Does this user have access to club features pre interactr evolution, interactr evolution club is a different field"
+  is_club: Int
+  "When a user is a subuser of an agency user this is the id of the users 'parent'"
+  parent_user_id: Int
+  "For agency sub users, this is an array of projects id's they have access to"
+  projects: [Int]
+  "The max projects this user can create"
+  max_projects: Int
+  integration_youzign: JSON
+  "Api Key used to interactr with the public api"
+  api_key: String
+  integration_zapier: JSON
+  integration_mailchimp: JSON
+  "GDPR Fields still WIP."
+  show_gdpr: Int
+  "GDPR Fields still WIP."
+  use_custom_url: Int
+  "GDPR Fields still WIP."
+  gdpr_text: String
+  "GDPR Fields still WIP."
+  privacy_policy_url: String
+  "GDPR Fields still WIP."
+  privacy_policy_text: String
+  "Removes the interactr logo on share pages"
+  hide_logo_on_share_page: Int
+  transaction_id: String @deprecated(reason: "Field not used")
+  "Does this user have read only permissions. Only applicable to subusers"
+  read_only: Int
+  "Does user have access to the evolution pro features"
+  is_pro: Int
+  "Does user have access to the evolution club features"
+  is_agency_club: Int
+  "An array of the users sub users"
+  subusers: [User!] @method(name: "getSubUsers")
+  "Parent user relation"
+  parent: User @method(name: "getParentUser")
+  "has the users data been upgraded to 2.0"
+  upgraded: Int
+  "Usage Plan"
+  usage_plan: UsagePlan @method(name: "getUsagePlan")
+  "Used Plan"
+  used_plan: UsedPlan @method(name: "getUserPlanUsed")
+  "Get the users last login"
+  last_login: DateTime @method(name: "lastLogin")
+
+  "A projects User Logins"
+  logins: [UserLogin] @hasMany
+
+  "A User Brandings"
+  brandings: [Branding!]! @hasMany
+
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type LoginResponse {
+  user: User!
+  token: String!
+}
+
+type UsagePlan {
+  id : Int
+  name : String
+  streaming_mins : Int
+  upload_gb : Float
+}
+type UsedPlan {
+  used_storage : Float
+  used_mins : Float
+}
+
+type ResetLinkResponse {
+  success: Boolean!
+  message: String!
+}
+
+# Queries
+extend type Query @guard {
+  "Get the specific user"
+  user(id: ID! @eq): User @find
+  "Get the specific subUser"
+  subUser(id: ID! @eq): User
+    @can(ability: "authUserCanUpdateSubUser", injectArgs: true)
+    @find
+  "Search the users list ADMIN ONLY"
+  users(search: String @search): [User!]!
+    @can(ability: "viewAllUsers")
+    @paginate
+  "Search the sub users list AGENCY ONLY"
+  subUsers(search: String @search, parent_user_id: Int! @eq): [User!]! @paginate
+}
+
+extend type Query {
+  "Get the authenticared user based off the auth token in the header"
+  me: User @auth
+}
+
+input LoginInput {
+  email: String! @rules(apply: ["max:255"])
+  password: String! @rules(apply: ["max:255"])
+}
+
+input ForgotPasswordInput {
+  email: String! @rules(apply: ["max:255"])
+}
+
+input ResetPasswordInput {
+  token: String!
+  email: String! @rules(apply: ["max:255", "email"])
+  password: String! @rules(apply: ["max:255", "min:8"])
+  password_confirmed: String! @rules(apply: ["max:255", "min:8"])
+}
+
+# Create user fields (NOTE: This is only for users created via the UI)
+input CreateUserInput {
+  name: String! @rules(apply: ["max:255"])
+  email: String! @rules(apply: ["max:255", "email"])
+  password: String! @rules(apply: ["max:255"]) @hash
+  read_only: Int @rules(apply: ["boolean"])
+  company_name: String @rules(apply: ["max:255"])
+  logo: String @rules(apply: ["max:255"])
+  projects: JSON
+  agency_page: Int
+  upgraded: Int
+}
+
+# Update user fields
+input UpdateUserInput {
+  id: ID!
+  name: String @rules(apply: ["max:255"])
+  email: String @rules(apply: ["max:255", "email"])
+  password: String @rules(apply: ["max:255"]) @hash
+  read_only: Int @rules(apply: ["boolean"])
+  is_club: Int @rules(apply: ["boolean"])
+  is_pro: Int @rules(apply: ["boolean"])
+  is_agency: Int @rules(apply: ["boolean"])
+  is_agency_club: Int @rules(apply: ["boolean"])
+  avatar_url: String @rules(apply: ["max:255"])
+  company_name: String @rules(apply: ["max:255"])
+  hide_logo_on_share_page: Int @rules(apply: ["boolean"])
+  logo: String @rules(apply: ["max:255"])
+  api_key: String @rules(apply: ["max:255"])
+  integration_youzign: JSON
+  integration_zapier: JSON
+  integration_mailchimp: JSON
+  integration_aweber: String
+  integration_sendlane: JSON
+  integration_activecampaign: JSON
+  integration_getresponse: JSON
+  projects: JSON
+  upgraded: Int
+}
+
+# Update subUser fields
+input UpdateSubUserInput {
+  id: ID!
+  name: String @rules(apply: ["max:255"])
+  email: String @rules(apply: ["max:255", "email"])
+  password: String @rules(apply: ["max:255"]) @hash
+  read_only: Int @rules(apply: ["boolean"])
+  logo: String @rules(apply: ["max:255"])
+  company_name: String @rules(apply: ["max:255"])
+  avatar_url: String @rules(apply: ["max:255"])
+  projects: JSON
+}
+
+extend type Mutation {
+  "Authenticate a user"
+  login(input: LoginInput @spread): LoginResponse
+    @field(resolver: "AuthResolver@login")
+  "Re-authenticate a user"
+  reauthenticate: LoginResponse @field(resolver: "AuthResolver@reauthenticate")
+  logout: Boolean @field(resolver: "AuthResolver@logout")
+  updateForgottenPassword(
+    input: ForgotPasswordInput @spread
+  ): ResetLinkResponse
+    @can(
+      ability: "passwordForgot"
+      model: "App\\Models\\User"
+      injectArgs: true
+    )
+    @field(resolver: "AuthResolver@updateForgottenPassword")
+  resetPassword(input: ResetPasswordInput @spread): Boolean
+    @field(resolver: "AuthResolver@resetPassword")
+  "Update a user in the resource. ID must be passed along with any fields to update"
+  updateUser(input: UpdateUserInput! @spread): User
+    @can(ability: "update")
+    @update
+  "Update a subUser in the resource. ID must be passed along with any fields to update"
+  updateSubUser(input: UpdateSubUserInput! @spread): User
+    @can(ability: "updateSubUser", injectArgs: true)
+    @update
+  "Create a new user"
+  createUser(input: CreateUserInput! @spread): User
+    @can(ability: "create")
+    @create
+  "Delete a user"
+  deleteUser(id: ID!): User @can(ability: "delete", injectArgs: true) @delete
+}

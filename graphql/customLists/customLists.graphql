@@ -1,0 +1,52 @@
+type CustomLists {
+    id: ID!
+    "Name of the custom list"
+    custom_list_name: String!
+    "Get given custom list contacts added from Player App"
+    emails: [CustomListsEmails] @hasMany
+    "The author of given custom list"
+    author: User @belongsTo
+
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+extend type Query @guard {
+    "Get a single custom list"
+    customList(id: ID @eq): CustomLists @find
+    "Get all custom lists that authenticated user has"
+    customLists: [CustomLists!]! @all
+}
+
+input CreateCustomListInput {
+    custom_list_name: String! @rules(apply: ["max:255"])
+}
+
+input CreateCustomListEmailHasMany {
+    connect: ID,
+    create: [CreateCustomListsEmailsInput!]
+}
+
+input UpdateCustomListInput {
+    id: ID!
+    custom_list_name: String @rules(apply: ["max:255"])
+}
+
+input AddCustomListContactInput {
+    id: ID!
+    emails: CreateCustomListEmailHasMany
+}
+
+extend type Mutation @guard {
+    "Create a new custom list for authenticated user"
+    createCustomList(input: CreateCustomListInput! @spread): CustomLists!
+        @create
+        @inject(context: "user.id", name: "user_id")
+    "Update a single custom list"
+    updateCustomList(input: UpdateCustomListInput! @spread) : CustomLists! @update
+    "Delete a single custom list"
+    deleteCustomList(id: ID!): CustomLists @delete
+    "Add Email Contact for custom list given from Player App"
+    addCustomListContact(input: AddCustomListContactInput! @spread) : CustomLists! @update
+
+}

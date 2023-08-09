@@ -1,0 +1,88 @@
+type ModalElement {
+    id: ID!
+
+    element_type: String
+    element_id: Int!
+    modal_id: Int!
+
+    "The ModalElement element uses the Element Interface to define the polymorphic relation to the various element types"
+    element: Element! @morphTo
+
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+extend type Query @guard {
+    "Get a single modal element instance"
+    modalElement(id: ID! @eq) : ModalElement @find
+}
+
+"Allowed update values for a modal element"
+input UpdateModalElementInput {
+    id: ID!
+    element_type: String
+    element_id: Int
+    modal_id: Int
+    ButtonElement: UpdateButtonElement
+    HotspotElement: UpdateHotspotElement
+    ImageElement: UpdateImageElement
+    TextElement: UpdateTextElement
+    CustomHtmlElement:UpdateCustomHtmlElement
+    TriggerElement: UpdateTriggerElement
+    FormElement: UpdateFormElement
+}
+
+input UpdateButtonElement {
+    update: UpdateButtonElementInput
+}
+input UpdateHotspotElement {
+    update: UpdateHotspotElementInput
+}
+input UpdateImageElement {
+    update: UpdateImageElementInput
+}
+input UpdateTextElement {
+    update: UpdateTextElementInput
+}
+input UpdateCustomHtmlElement {
+    update: UpdateCustomHtmlElementInput
+}
+input UpdateTriggerElement {
+    update: UpdateTriggerElementInput
+}
+input UpdateFormElement {
+    update: UpdateFormElementInput
+}
+
+input CreateModalElementInput {
+    modal_id: Int! @rules(apply: ["max:11"])
+    element_type: String! @rules(apply: ["max:255"])
+    element_id: Int! @rules(apply: ["max:11"])
+}
+
+input CopyModalElementInput {
+    id: Int! @rules(apply: ["max:11"])
+}
+
+input UpdateModalElementsHasMany {
+    update: [UpdateModalElementInput]
+}
+
+extend type Mutation @guard {
+    "Create a new modal element"
+    createModalElement(input: CreateModalElementInput @spread):
+        ModalElement
+        @create
+    "Update the modal element"
+    updateModalElement(input: UpdateModalElementInput! @spread):
+        ModalElement
+        @update
+    "Delete the modal element"
+    deleteModalElement(id: ID!):
+        ModalElement
+        @delete
+    "Copy tbe modal element"
+    copyModalElement(input: CopyModalElementInput @spread):
+        ModalElement!
+        @field(resolver: "ModalResolver@copyModalElement")
+}

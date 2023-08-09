@@ -1,0 +1,92 @@
+type Media {
+    id: ID!
+    "The name of the media item "
+    name: String!
+    "The playlist m3u8 file location"
+    manifest_url: String
+    "The url to a unencoded mp4 file"
+    url: String
+    "Thumbnail for the media"
+    thumbnail_url: String
+    "Is the media an image or video"
+    is_image: Int
+    user: User @belongsTo
+    # project: Project @belongsTo
+    project_id: Int
+    encoded_size: Int
+    media_size: String
+    "Storage path for the uploaded media until it's been encoded"
+    temp_storage_url: String
+    storage_used: Float
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+extend type Query @guard {
+    "Get a single media"
+    media(
+        id: ID @eq
+    ): Media @find
+    "Return a list of medias, this function allows a filter by search param and orderBy filter option"
+    medias(
+        search: String
+        orderBy: [SortOption!]!
+        is_image: Int
+        project_id: Int
+        not_project_id: Int
+        media_size: String
+    ): [Media!]! @paginate(builder: "App\\GraphQL\\Mutations\\MediaResolver@getMedias")
+    "Get all medias without pagination --- use with caution"
+    mediasWithoutPagination(
+        project_id: Int @eq
+    ) : [Media!]! @all
+}
+
+"Allowed update values for a users media"
+input UpdateMediaInput {
+    id: ID!
+    name: String @rules(apply: ["max:255"])
+    manifest_url: String @rules(apply: ["max:255"])
+
+}
+
+input UpdateMediaBelongsTo {
+    update: UpdateMediaInput
+}
+
+input CopyMediaInput {
+    mediaId: Int!
+    projectId: Int!
+}
+
+"Values allowed on create media input"
+input CreateMediaInput {
+    name: String ! @rules(apply: ["max:255"])
+    thumbnail_url: String  @rules(apply: ["max:255"])
+    manifest_url: String  @rules(apply: ["max:255"])
+    media_size: String  @rules(apply: ["max:255"])
+    is_image: Int ! @rules(apply: ["boolean"])
+    project_id: Int @rules(apply: ["max:11"])
+    temp_storage_url: String  @rules(apply: ["max:255"]),
+    url: String @rules(apply: ["max:255"])
+}
+
+type MediaCreatedType {
+    media: Media!
+}
+
+extend type Mutation @guard {
+    "Create new media"
+    createMedia(input: CreateMediaInput @spread) : Media @field(resolver: "MediaResolver@create")
+    "Update the project"
+    updateMedia(input: UpdateMediaInput! @spread) : Media
+        @can(ability: "update" find: "id")
+        @update
+    "Delete a media item"
+    deleteMedia(id: ID!) : Media
+        @can(ability: "destroy" find: "id")
+        @delete
+    "Copy a media to another project"
+    copyToProject(input: CopyMediaInput @spread) : Media
+        @field(resolver: "MediaResolver@copyToProject")
+}

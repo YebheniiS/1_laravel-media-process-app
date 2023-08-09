@@ -1,0 +1,74 @@
+type HotspotElement {
+    id: ID!
+    "The name of the element, this is shown on the timeline bar"
+    name: String
+    "X Position on the Canvas"
+    posX: Float
+    "Y Position on the Canvas"
+    posY: Float
+    "Width of the hotspot"
+    width: Int
+    "Height of the hotspot"
+    height: Int
+    "Type of action to take when hotspot is clicked"
+    action: String
+    "Arg of action to take when hotspot is clicked"
+    actionArg: String
+    "When hotspot is clicked should it open link in new in window"
+    open_in_new_tab: Int
+    "Stack order of the element"
+    zIndex: Int
+    "Send event to facebook when the element is clicked"
+    send_facebook_click_event: Int
+    "The id of the facebook click event"
+    facebook_click_event_id: Int
+    "Send survey click event"
+    send_survey_click_event: Int
+
+    created_at: DateTime
+    updated_at: DateTime
+}
+
+extend type Query @guard {
+    "Get a single hotspot element instance"
+    hotspotElement(id: ID! @eq) : HotspotElement @find
+}
+
+"Allowed update values for a hotspot element"
+input UpdateHotspotElementInput {
+    id: ID
+    name: String @rules(apply: ["max:255"])
+    posX: Float @rules(apply: ["max:11"])
+    posY: Float @rules(apply: ["max:11"])
+    width: Int @rules(apply: ["max:11"])
+    height: Int @rules(apply: ["max:11"])
+    action: String @rules(apply: ["max:255"])
+    actionArg: String @rules(apply: ["max:255"])
+    open_in_new_tab: Int @rules(apply: ["max:11"])
+    zIndex: Int = 0 @rules(apply: ["max:11"])
+    send_facebook_click_event: Int @rules(apply: ["max:11"])
+    facebook_click_event_id: Int @rules(apply: ["max:11"])
+    send_survey_click_event: Int @rules(apply: ["max:11"])
+}
+
+"Available fields for creating a new instance"
+input CreateHotspotElementInput {
+    name: String @rules(apply: ["max:255"])
+    posX: Float @rules(apply: ["max:11"])
+    posY: Float @rules(apply: ["max:11"])
+}
+
+extend type Mutation @guard {
+    "Create a new hotspot element"
+    createHotspotElement(input: CreateHotspotElementInput @spread):
+        HotspotElement!
+        @create
+    "Update the hotspot element"
+    updateHotspotElement(input: UpdateHotspotElementInput @spread):
+        HotspotElement!
+        @update
+    "Delete the hotspot element"
+    deleteHotspotElement(id: ID!):
+        HotspotElement!
+        @delete
+}
